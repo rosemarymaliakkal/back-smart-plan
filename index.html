@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Back-Smart Workouts</title>
-<meta name="description" content="A simple day-by-day workout logger for a back-friendly full-body plan.">
+<title>Steady Training</title>
+<meta name="description" content="A personalised, back-friendly workout plan and logger with a full exercise library.">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="color-scheme" content="light only">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,12 +32,42 @@ p{margin:0}
 
 /* top bar */
 .top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
-.top .wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:56px}
+.topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:60px;gap:8px}
+.backbtn{justify-self:start;display:inline-flex;align-items:center;gap:2px;border:0;background:transparent;color:var(--accent-ink);font-family:var(--display);font-weight:700;font-size:15px;padding:8px 10px 8px 2px;border-radius:10px;cursor:pointer;min-height:44px}
+.backbtn svg{width:22px;height:22px}
+.backbtn:hover{background:var(--field)}
+.ttl{display:flex;flex-direction:column;align-items:center;line-height:1.2;min-width:0}
+.ttl b{font-family:var(--display);font-weight:800;font-size:16px;white-space:nowrap}
 .iconbtn{width:44px;height:44px;border:0;background:transparent;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink)}
 .iconbtn:hover{background:var(--field)}
 .iconbtn svg{width:22px;height:22px}
-.clock{font-variant-numeric:tabular-nums;font-weight:600;color:var(--muted);text-align:center}
-.finish{justify-self:end;border:0;background:var(--accent);color:var(--on-accent);font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase;border-radius:10px;padding:9px 16px;cursor:pointer}
+.clock{font-variant-numeric:tabular-nums;font-weight:600;font-size:13px;color:var(--muted);text-align:center}
+.finish{justify-self:end;border:0;background:var(--accent);color:var(--on-accent);font-family:var(--display);font-weight:800;font-size:14px;border-radius:999px;padding:8px 18px;cursor:pointer;min-height:40px}
+.spacer{justify-self:end;width:44px}
+
+/* library */
+.search{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);padding:0 14px;font:inherit;color:var(--ink)}
+.search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:none;border:0;background:var(--surface);color:var(--muted);font-weight:600;font-size:13px;border-radius:999px;padding:7px 12px;cursor:pointer;min-height:36px}
+.cat[aria-pressed="true"]{background:var(--ink);color:#fff}
+.libgrp{font-family:var(--display);font-weight:800;font-size:15px;padding:16px 0 6px}
+.liblist{background:var(--surface);border-radius:14px;overflow:hidden}
+.librow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left;padding:11px 12px 11px 14px;cursor:pointer;min-height:56px}
+.librow:last-child{border-bottom:0}
+.librow:hover{background:var(--bg)}
+.librow b{display:block;font-weight:600}
+.librow small{font-size:13px;color:var(--muted)}
+.safe{font-size:11px;font-weight:700;border-radius:999px;padding:3px 8px;white-space:nowrap}
+.s-ok{background:var(--accent-soft);color:var(--accent-ink)}
+.s-care{background:#FFF3D9;color:#8A5A00}
+.s-later{background:var(--warm-soft);color:var(--warm)}
+.legendrow{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12px;color:var(--muted);align-items:center}
+.libcard{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--surface);border:0;border-radius:16px;padding:16px;cursor:pointer;text-align:left;width:100%}
+.libcard b{font-family:var(--display);font-size:16px;display:block}
+.libcard span{font-size:13px;color:var(--muted)}
+.addline{display:flex;gap:8px;align-items:center}
 
 /* home */
 .home{padding-top:max(28px,env(safe-area-inset-top,0px));padding-bottom:48px;display:flex;flex-direction:column;gap:22px}
@@ -170,12 +200,13 @@ dialog::backdrop{background:rgba(38,43,58,.35)}
 <!-- HOME -->
 <section id="home" class="wrap home">
   <div>
-    <div class="brand">Back-Smart</div>
+    <div class="brand">Steady &#xb7; your personal plan</div>
     <h1>This week</h1>
     <p class="sub">Tap a day to start. Missed one? Just start the next workout in line.</p>
   </div>
   <button class="resume" id="resume" type="button" hidden><div><b id="resumeT"></b><span id="resumeS"></span></div><span aria-hidden="true">Resume &rsaquo;</span></button>
   <div class="days" id="days"></div>
+  <button class="libcard" id="openLib" type="button"><div><b>Exercise library</b><span>Every exercise by body part, with how-to and back-safety notes</span></div><span class="chev" aria-hidden="true">&rsaquo;</span></button>
   <div class="sec">
     <h2>History</h2>
     <div id="history" class="sec"></div>
@@ -202,9 +233,9 @@ dialog::backdrop{background:rgba(38,43,58,.35)}
 
 <!-- WORKOUT -->
 <section id="workout" hidden>
-  <div class="top"><div class="wrap">
-    <button class="iconbtn" id="wBack" type="button" aria-label="Back to the week (workout keeps running)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
-    <span class="clock" id="clock">0:00</span>
+  <div class="top"><div class="wrap topbar">
+    <button class="backbtn" id="wBack" type="button" aria-label="Back to the week. Your workout keeps running."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Week</button>
+    <div class="ttl"><b id="tDay">Workout</b><span class="clock" id="clock">0:00</span></div>
     <button class="finish" id="finish" type="button">Finish</button>
   </div></div>
   <div class="wrap work">
@@ -215,6 +246,18 @@ dialog::backdrop{background:rgba(38,43,58,.35)}
       <button class="bigtext" id="addEx" type="button">Add exercise</button>
       <button class="bigtext warn" id="cancelW" type="button">Cancel workout</button>
     </div>
+  </div>
+</section>
+
+<!-- LIBRARY -->
+<section id="library" hidden>
+  <div class="top"><div class="wrap topbar">
+    <button class="backbtn" id="lBack" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Week</button>
+    <div class="ttl"><b>Exercise library</b></div>
+    <span class="spacer"></span>
+  </div></div>
+  <div class="wrap work" style="display:flex;flex-direction:column;gap:12px">
+    <div id="libHost"></div>
   </div>
 </section>
 
@@ -236,15 +279,17 @@ dialog::backdrop{background:rgba(38,43,58,.35)}
 <!-- guide sheet -->
 <dialog id="guide" aria-labelledby="gName"><div class="sheet">
   <div class="shead"><div><h3 id="gName"></h3><span class="sub" id="gRx"></span></div><button class="iconbtn" data-close type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div><span class="safe" id="gSafe"></span></div>
   <div class="fig" id="gFig"></div>
   <ul id="gCues"></ul>
   <a id="gDemo" target="_blank" rel="noopener">Watch a demo video &#x2197;</a>
+  <button class="btn" id="gAdd" type="button" hidden>Add to today's workout</button>
 </div></dialog>
 
 <!-- picker -->
 <dialog id="picker" aria-labelledby="pTitle"><div class="sheet">
   <div class="shead"><h3 id="pTitle">Add exercise</h3><button class="iconbtn" data-close type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-  <div class="picklist" id="pList"></div>
+  <div class="picklist" id="pHost"></div>
 </div></dialog>
 
 <!-- exercise menu -->
@@ -328,9 +373,161 @@ const EX={
  child:{g:'cool',log:'check',name:'Child\u2019s pose',rx:'30\u201360 s',q:'child pose stretch',cues:['Sit back toward your heels, arms forward','Breathe slowly into your back. Skip if it hurts'],
   a:{h:[130,116],n:[118,110],c:[96,100],p:[70,108],k:[94,122],f:[64,125],e:[138,122],w:[158,124]},b:{c:[96,97]}}
 };
+/* ================= full library =================
+   safety: ok = back-friendly now, care = go gently / good form / moderate weight, later = heavy spine load, only after a physio says OK
+   entry: existing id string, or [name, equipment, log type, safety, how-to cue] */
+const LIB=[
+ ['Chest',[
+  'dbbench','incline','pushup',
+  ['Machine chest press','Machine','wr','ok','Back flat against the pad. Press out without arching.'],
+  ['Cable fly','Cable','wr','ok','Slight bend in the elbows. Hug a big tree in front of your chest.'],
+  ['Pec deck','Machine','wr','ok','Sit tall, back on the pad. Bring the handles together slowly.'],
+  ['Incline push-up','Bodyweight','r','ok','Hands on a bench or bar. Body in one straight line.'],
+  ['Dumbbell floor press','Dumbbell','wr','ok','Lie on the floor, knees bent. Elbows touch the floor, then press.'],
+  ['Barbell bench press','Barbell','wr','care','Feet flat, only a small arch. Use a spotter or safety bars.'],
+  ['Decline bench press','Barbell or dumbbell','wr','care','Lock your legs in. Lower slowly to the lower chest.'],
+  ['Chest dip','Bodyweight','r','care','Lean slightly forward. Stop if your shoulders ache.'],
+  ['Dumbbell pullover','Dumbbell','wr','care','Keep ribs down. Don\u2019t let your lower back arch off the bench.']]],
+ ['Back',[
+  'pulldown','csrow','seatedrow',
+  ['Neutral-grip pulldown','Cable','wr','ok','Palms facing each other. Pull to your upper chest.'],
+  ['One-arm dumbbell row','Dumbbell','wr','ok','Hand and knee on a bench, back flat. Pull elbow to hip.'],
+  ['Machine row','Machine','wr','ok','Chest on the pad. Squeeze shoulder blades together.'],
+  ['Straight-arm pulldown','Cable','wr','ok','Arms long, hinge slightly. Sweep the bar down to your thighs.'],
+  ['Assisted pull-up','Machine','wr','ok','Kneel on the pad. Pull chin over the bar, lower slowly.'],
+  ['Pull-up','Bodyweight','r','care','Brace your core so your back doesn\u2019t swing or arch.'],
+  ['Inverted row','Bodyweight','r','care','Body straight under a bar. Pull chest to the bar.'],
+  ['Bent-over barbell row','Barbell','wr','later','Loads the lower back while bent over. Use chest-supported rows for now.'],
+  ['T-bar row','Machine or barbell','wr','later','Bent-over position. Choose the chest-supported version first.'],
+  ['Conventional deadlift','Barbell','wr','later','Heavy spinal load. Only with a physio OK and coached form.'],
+  ['Trap-bar deadlift','Trap bar','wr','later','The most back-friendly deadlift. Start light once your back is calm.'],
+  ['Back extension','Machine','r','later','Only to a straight line, never into an arch. Ask your physio first.']]],
+ ['Shoulders',[
+  'shoulderpress','latraise','facepull',
+  ['Machine shoulder press','Machine','wr','ok','Back against the pad. Press up without leaning back.'],
+  ['Cable lateral raise','Cable','wr','ok','Cable across your body. Lift out to shoulder height.'],
+  ['Rear-delt fly','Machine or dumbbell','wr','ok','Chest on the pad. Open your arms wide, squeeze the back of the shoulders.'],
+  ['Front raise','Dumbbell','wr','ok','Light weight. Lift to eye level, no swinging.'],
+  ['Arnold press (seated)','Dumbbell','wr','ok','Start palms facing you, rotate as you press up.'],
+  ['Band pull-apart','Band','r','ok','Arms straight. Pull the band to your chest.'],
+  ['Landmine press','Barbell','wr','care','Half-kneeling. Press the bar up and forward, ribs down.'],
+  ['Upright row (wide grip)','Cable or barbell','wr','care','Wide grip, only to chest height. Stop if it pinches.'],
+  ['Shrug','Dumbbell','wr','care','Stand tall. Lift shoulders straight up, no rolling.'],
+  ['Standing overhead press','Barbell','wr','later','Tends to arch the lower back. Press seated for now.']]],
+ ['Biceps',[
+  ['Dumbbell curl','Dumbbell','wr','ok','Elbows by your sides. Don\u2019t swing your body.'],
+  ['Hammer curl','Dumbbell','wr','ok','Palms facing in. Curl up slowly.'],
+  ['Cable curl','Cable','wr','ok','Stand tall, elbows still. Squeeze at the top.'],
+  ['Preacher curl','Machine or dumbbell','wr','ok','Arms on the pad. Lower all the way, slowly.'],
+  ['Incline dumbbell curl','Dumbbell','wr','ok','Back on an incline bench, arms hanging. Curl up.'],
+  ['Concentration curl','Dumbbell','wr','ok','Seated, elbow on inner thigh. Curl with control.'],
+  ['Barbell curl','Barbell','wr','care','Don\u2019t lean back to lift it. Lighter is better.']]],
+ ['Triceps',[
+  ['Triceps pushdown (rope)','Cable','wr','ok','Elbows pinned to your sides. Push down and spread the rope.'],
+  ['Triceps pushdown (straight bar)','Cable','wr','ok','Elbows still. Push the bar down to your thighs.'],
+  ['Overhead cable extension','Cable','wr','ok','Face away, slight lunge. Ribs down, extend arms overhead.'],
+  ['Dumbbell skull crusher','Dumbbell','wr','ok','Lying on a bench. Bend only at the elbows.'],
+  ['Triceps kickback','Dumbbell','wr','ok','Supported on a bench, back flat. Straighten the arm behind you.'],
+  ['Machine dip','Machine','wr','ok','Sit tall, push the handles down.'],
+  ['Close-grip bench press','Barbell','wr','care','Hands shoulder-width. Elbows close to your body.'],
+  ['Bench dip','Bodyweight','r','care','Hard on the shoulders. Keep it shallow.']]],
+ ['Legs',[
+  'goblet','legpress','split','stepup',
+  ['Leg extension','Machine','wr','ok','Back on the pad. Straighten your legs slowly.'],
+  ['Split squat','Dumbbell','wr','ok','Both feet on the floor, long stance. Drop the back knee down.'],
+  ['Reverse lunge','Dumbbell','wr','ok','Step back, drop the back knee. Chest tall.'],
+  ['Wall sit','Bodyweight','t','ok','Back flat on the wall, thighs level with the floor.'],
+  ['Box squat','Dumbbell','wr','ok','Sit back to a box, stand up tall. Controls depth.'],
+  ['Walking lunge','Dumbbell','wr','care','Short, controlled steps. Keep your chest up.'],
+  ['Hack squat','Machine','wr','care','Back flat on the pad. Don\u2019t go so deep your hips curl.'],
+  ['Front squat','Barbell','wr','later','Heavy spinal load. Only with a physio OK.'],
+  ['Barbell back squat','Barbell','wr','later','Heavy spinal load. Only with a physio OK and coached form.']]],
+ ['Glutes & hamstrings',[
+  'hipthrust','pullthrough','bridge',
+  ['Seated leg curl','Machine','wr','ok','Back against the pad. Curl your heels down and under.'],
+  ['Lying leg curl','Machine','wr','ok','Hips stay pressed into the pad. Curl up slowly.'],
+  ['Cable kickback','Cable','wr','ok','Hold the frame, back flat. Kick the leg straight back.'],
+  ['Hip abduction machine','Machine','wr','ok','Sit tall. Push knees out against the pads.'],
+  ['Hip adduction machine','Machine','wr','ok','Sit tall. Squeeze knees together slowly.'],
+  ['Single-leg glute bridge','Bodyweight','r','ok','One foot down, push hips up. Hips stay level.'],
+  ['Romanian deadlift (light)','Dumbbell','wr','care','Light weight, flat back. Push hips back, stop at mid-shin.'],
+  ['Single-leg Romanian deadlift','Dumbbell','wr','care','Hold something for balance. Hinge with a flat back.'],
+  ['Nordic hamstring curl','Bodyweight','r','care','Very hard. Lower slowly, catch yourself with your hands.'],
+  ['Kettlebell swing','Kettlebell','r','later','Fast hip hinge. Only once your back is calm and form is coached.']]],
+ ['Calves',[
+  ['Standing calf raise','Machine or dumbbell','wr','ok','Rise up tall, pause, lower slowly.'],
+  ['Seated calf raise','Machine','wr','ok','Knees under the pad. Full range up and down.'],
+  ['Leg press calf raise','Machine','wr','ok','Balls of the feet on the plate. Push through the toes.']]],
+ ['Core',[
+  'deadbug','plank','farmer','sideplank','birddog','curlup',
+  ['Pallof press','Cable','r','ok','Stand side-on to the cable. Press out and resist the twist.'],
+  ['Suitcase carry','Dumbbell','d','ok','One weight in one hand. Walk tall without leaning.'],
+  ['Bear hold','Bodyweight','t','ok','Hands and toes, knees just off the floor. Back flat.'],
+  ['Stir the pot','Swiss ball','r','care','Forearms on a ball, plank position. Make small circles.'],
+  ['Hollow hold','Bodyweight','t','care','Lower back pressed down. Start with knees bent.'],
+  ['Cable woodchop','Cable','r','care','Rotate through hips and upper back, not the lower back.'],
+  ['Hanging knee raise','Bodyweight','r','care','No swinging. Lift knees with control.'],
+  ['Ab wheel rollout','Ab wheel','r','later','Easy to arch the lower back. Only once core is strong.'],
+  ['Sit-up','Bodyweight','r','later','Repeated spine bending. Use the curl-up instead.'],
+  ['Crunch','Bodyweight','r','later','Repeated spine bending. Use the curl-up or dead bug instead.'],
+  ['Russian twist','Bodyweight','r','later','Bending plus twisting. Use the Pallof press instead.']]],
+ ['Warm-up & mobility',[
+  'catcow','hipflexor',
+  ['Cobra pose','Mat','check','care','Lie face down, hands under shoulders. Lift only to a gentle arch, hips stay down. Skip if it pinches.'],
+  ['Superman','Mat','check','care','Face down. Lift arms and legs just off the floor, small range, hold 2\u20133 s.'],
+  ['Thread the needle','Mat','check','ok','On all fours, slide one arm under your body and rotate the upper back.'],
+  ['Open book','Mat','check','ok','Lie on your side, knees bent. Open the top arm like a book.'],
+  ['World\u2019s greatest stretch','Mat','check','ok','Lunge, hand down, rotate the other arm up to the ceiling.'],
+  ['Leg swings','None','check','ok','Hold a wall. Swing each leg front-to-back and side-to-side.'],
+  ['Arm circles','None','check','ok','Small to big circles, both directions.'],
+  ['Hip circles','None','check','ok','Hands on hips, slow circles both ways.'],
+  ['Clamshell','Band','check','ok','On your side, knees bent. Open the top knee, feet together.'],
+  ['Wall slides','Wall','check','ok','Back and arms on the wall. Slide arms up and down.'],
+  ['90/90 hip switch','Mat','check','ok','Seated, both knees bent at 90\u00b0. Rotate knees side to side.'],
+  ['Foam roll glutes & thighs','Foam roller','check','ok','Roll slowly, 30\u201360 s per area. Avoid rolling the lower back.'],
+  ['Thoracic extension on roller','Foam roller','check','ok','Roller under your upper back only. Gently lean back over it.']]],
+ ['Stretch & relax',[
+  'hamstring','figure4','child',
+  ['Savasana (corpse pose)','Mat','check','ok','Lie flat, arms by your sides, eyes closed. Breathe slowly for 2\u20135 minutes.'],
+  ['Knees-to-chest hug','Mat','check','care','Gently hug both knees. Small, comfortable range only.'],
+  ['Supine twist','Mat','check','care','Knees together, let them drop gently to one side. Small range.'],
+  ['Doorway chest stretch','Doorway','check','ok','Forearm on the frame, step through gently.'],
+  ['Cross-body shoulder stretch','None','check','ok','Pull one arm across your chest. Hold 30 s.'],
+  ['Overhead triceps stretch','None','check','ok','Hand behind your head, gently push the elbow.'],
+  ['Standing quad stretch','None','check','ok','Hold your ankle behind you, knees together, glute squeezed.'],
+  ['Calf stretch','Wall','check','ok','Back leg straight, heel down. Lean into the wall.'],
+  ['Seated piriformis stretch','Chair','check','ok','Ankle on opposite knee, sit tall, lean forward from the hips.'],
+  ['Butterfly stretch','Mat','check','ok','Soles together, sit tall. Let knees drop gently.'],
+  ['Legs up the wall','Wall','check','ok','Lie with legs resting up a wall. Relax and breathe.'],
+  ['Seated forward fold','Mat','check','later','Rounds the lower back. Use the hamstring strap stretch instead.']]],
+ ['Cardio',[
+  ['Incline walk','Treadmill','cardio','ok','Brisk walk on a slope. Don\u2019t hold the handrails.'],
+  ['Bike','Bike','cardio','ok','Sit tall, seat high enough that your knee is almost straight.'],
+  ['Elliptical','Machine','cardio','ok','Upright posture, smooth strides.'],
+  ['Swimming','Pool','cardio','ok','Backstroke and front crawl are easiest on the back.'],
+  ['Stair climber','Machine','cardio','ok','Light hands on the rails, stand tall.'],
+  ['HIIT \u2013 bike intervals','Bike','cardio','ok','8 \u00d7 30 s hard, 90 s easy.'],
+  ['Jogging','Outdoors or treadmill','cardio','care','Short, light steps. Stop if your back aches.'],
+  ['Rowing machine','Machine','cardio','care','Push with the legs, hinge with a flat back. Not for sprints yet.'],
+  ['Badminton','Court','cardio','care','Warm up first. Bend the knees, not the back.'],
+  ['Jump rope','Rope','cardio','later','Repeated impact. Add once your back is calm.']]]
+];
+const SAFE={ok:['s-ok','Back-friendly'],care:['s-care','Go gently'],later:['s-later','Later, with physio OK']};
+const DEF_RX={wr:'3 \u00d7 8\u201312',r:'3 \u00d7 8\u201312',t:'3 \u00d7 20\u201330 s',d:'3 \u00d7 30 m',check:'30\u201360 s',cardio:'20\u201340 min'};
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const CATS=[];
+LIB.forEach(([cat,list])=>{
+  const ids=list.map(e=>{
+    if(typeof e==='string'){EX[e].cat=EX[e].cat||cat;EX[e].safe=EX[e].safe||'ok';return e;}
+    const [name,equip,log,safe,cue]=e,id=slug(name);
+    if(!EX[id])EX[id]={g:'lib',cat,name,equip,log,safe,rx:DEF_RX[log],sets:3,q:name+' exercise form',cues:[cue]};
+    return id;
+  });
+  CATS.push([cat,ids]);
+});
 const byGroup=g=>Object.keys(EX).filter(id=>EX[id].g===g);
 const WARM=byGroup('warmup'), COOL=byGroup('cool').concat(['hipflexor']);
-const CARDIO_ACTS=['Incline walk','Bike','Elliptical','Swimming','Jogging','HIIT \u2013 bike intervals','Badminton','Other'];
+const CARDIO_ACTS=CATS.find(c=>c[0]==='Cardio')[1].map(id=>EX[id].name).concat(['Other']);
 const DAYS=[
  {d:'Monday',title:'Full Body A',kind:'str',ex:byGroup('A')},
  {d:'Tuesday',title:'Easy cardio',kind:'car',note:'30\u201340 min, easy pace',cardio:[['Incline walk',35]]},
@@ -422,20 +619,67 @@ function closeD(d){if(typeof d.close==='function'&&d.open)d.close();else d.remov
 document.querySelectorAll('dialog').forEach(d=>{
   d.addEventListener('click',e=>{if(e.target===d||e.target.closest('[data-close]'))closeD(d);});
 });
-let guideAnim=null;
-function showGuide(id){
-  const ex=EX[id],gd=document.getElementById('guide');
+let guideAnim=null,guideId=null;
+function showGuide(id,addable){
+  const ex=EX[id],gd=document.getElementById('guide');guideId=id;
   document.getElementById('gName').textContent=ex.name;
   document.getElementById('gRx').textContent=(ex.equip?ex.equip+' \u00b7 ':'')+'Target '+ex.rx;
-  const fig=document.getElementById('gFig');fig.textContent='';
-  const {svg,L}=buildFig(ex);fig.appendChild(svg);
-  const A=P(ex.a),B=ex.b?P(Object.assign({},ex.a,ex.b)):null;
-  draw(L,ex,B&&reduce?B:A);
+  const sf=SAFE[ex.safe||'ok'],sb=document.getElementById('gSafe');sb.className='safe '+sf[0];sb.textContent=sf[1];
+  const fig=document.getElementById('gFig');fig.textContent='';guideAnim=null;
+  if(ex.a){
+    fig.hidden=false;
+    const {svg,L}=buildFig(ex);fig.appendChild(svg);
+    const A=P(ex.a),B=ex.b?P(Object.assign({},ex.a,ex.b)):null;
+    draw(L,ex,B&&reduce?B:A);
+    guideAnim=B&&!reduce?{L,ex,A,B}:null;
+  }else fig.hidden=true;
   const ul=document.getElementById('gCues');ul.textContent='';
   ex.cues.forEach(c=>{const li=document.createElement('li');li.textContent=c;ul.appendChild(li);});
   document.getElementById('gDemo').href='https://www.youtube.com/results?search_query='+encodeURIComponent(ex.q);
-  guideAnim=B&&!reduce?{L,ex,A,B}:null;
+  document.getElementById('gAdd').hidden=!(addable&&S.active);
   openD(gd);
+}
+document.getElementById('gAdd').addEventListener('click',()=>{closeD(document.getElementById('guide'));addToWorkout(guideId);});
+
+/* ================= library ================= */
+function renderLib(host,mode){
+  host.textContent='';
+  const search=document.createElement('input');search.type='search';search.className='search';search.placeholder='Search exercises or equipment';search.setAttribute('aria-label','Search exercises');search.id=mode+'-search';
+  const cats=document.createElement('div');cats.className='cats';cats.setAttribute('role','group');cats.setAttribute('aria-label','Body part');
+  const legend=document.createElement('div');legend.className='legendrow';
+  legend.innerHTML=Object.values(SAFE).map(s=>'<span class="safe '+s[0]+'">'+s[1]+'</span>').join('');
+  const list=document.createElement('div');
+  host.append(search,cats,legend,list);host.style.display='flex';host.style.flexDirection='column';host.style.gap='12px';
+  let cur='All';
+  ['All'].concat(CATS.map(c=>c[0])).forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cat';b.textContent=c;b.setAttribute('aria-pressed',c===cur);
+    b.addEventListener('click',()=>{cur=c;cats.querySelectorAll('.cat').forEach(x=>x.setAttribute('aria-pressed',x.textContent===c));draw2();});cats.appendChild(b);});
+  function draw2(){
+    list.textContent='';const q=search.value.trim().toLowerCase();let n=0;
+    CATS.forEach(([cat,ids])=>{
+      if(cur!=='All'&&cat!==cur)return;
+      const hits=ids.filter(id=>!q||(EX[id].name+' '+(EX[id].equip||'')+' '+cat).toLowerCase().includes(q));
+      if(!hits.length)return;n+=hits.length;
+      const h=document.createElement('div');h.className='libgrp';h.textContent=cat+' \u00b7 '+hits.length;list.appendChild(h);
+      const box=document.createElement('div');box.className='liblist';
+      hits.forEach(id=>{const ex=EX[id],sf=SAFE[ex.safe||'ok'];
+        const r=document.createElement('button');r.type='button';r.className='librow';
+        r.innerHTML='<div><b>'+esc(ex.name)+'</b><small>'+esc(ex.equip||'')+'</small></div>'+
+          (mode==='pick'?'<span class="addline"><span class="safe '+sf[0]+'">'+sf[1]+'</span><span class="pillbtn">+ Add</span></span>':'<span class="safe '+sf[0]+'">'+sf[1]+'</span>');
+        r.addEventListener('click',()=>{if(mode==='pick'){closeD(picker);addToWorkout(id);}else showGuide(id,true);});
+        box.appendChild(r);});
+      list.appendChild(box);
+    });
+    if(!n){const p=document.createElement('p');p.className='empty';p.textContent='No exercises match "'+search.value+'".';list.appendChild(p);}
+  }
+  search.addEventListener('input',draw2);draw2();
+}
+function addToWorkout(id){
+  const W=S.active;if(!W){toast('Start a day first, then add exercises to it.');return;}
+  const ex=EX[id];
+  if(ex.log==='check'){const list=ex.cat==='Stretch & relax'?W.cool:W.warm;if(!list.some(x=>x.id===id))list.push({id,done:false});}
+  else if(ex.log==='cardio')W.cardio.push({act:ex.name,min:20,done:false});
+  else W.ex.push({id,sets:Array.from({length:ex.sets||3},()=>({done:false}))});
+  save();renderWorkout();show('workout');toast(ex.name+' added.');
 }
 document.getElementById('guide').addEventListener('close',()=>guideAnim=null);
 (function loop(t){
@@ -445,7 +689,10 @@ document.getElementById('guide').addEventListener('close',()=>guideAnim=null);
 })(0);
 
 /* ================= views ================= */
-const V={home:document.getElementById('home'),workout:document.getElementById('workout'),summary:document.getElementById('summary')};
+const V={home:document.getElementById('home'),workout:document.getElementById('workout'),library:document.getElementById('library'),summary:document.getElementById('summary')};
+let libBuilt=false;
+document.getElementById('openLib').addEventListener('click',()=>{if(!libBuilt){renderLib(document.getElementById('libHost'),'browse');libBuilt=true;}show('library');});
+document.getElementById('lBack').addEventListener('click',()=>{renderHome();show('home');});
 function show(v){Object.keys(V).forEach(k=>V[k].hidden=k!==v);window.scrollTo(0,0);}
 
 /* ---------- home ---------- */
@@ -497,6 +744,7 @@ function cols(t){return t==='wr'||t==='d'?'grid5':'grid4';}
 function renderWorkout(){
   const W=S.active;if(!W)return;
   document.getElementById('wDay').textContent=W.day;
+  document.getElementById('tDay').textContent=W.day;
   document.getElementById('wSub').textContent=W.title+(W.ex.length?' \u00b7 '+pl(W.ex.length,'exercise'):'');
   const box=document.getElementById('blocks');box.textContent='';
   if(W.warm.length)box.appendChild(checkBlock('Warm-up',W.warm));
@@ -605,17 +853,7 @@ document.getElementById('mDel').addEventListener('click',()=>{S.active.ex.splice
 
 /* picker */
 const picker=document.getElementById('picker');
-document.getElementById('addEx').addEventListener('click',()=>{
-  const list=document.getElementById('pList');list.textContent='';
-  [['A','Full Body A'],['B','Full Body B'],['C','Full Body C']].forEach(([g,label])=>{
-    const h=document.createElement('div');h.className='pickgrp';h.textContent=label;list.appendChild(h);
-    byGroup(g).forEach(id=>{const b=document.createElement('button');b.type='button';b.className='pick';
-      b.innerHTML='<b>'+esc(EX[id].name)+'</b><span>'+esc(EX[id].equip||'')+'</span>';
-      b.addEventListener('click',()=>{S.active.ex.push({id,sets:Array.from({length:EX[id].sets||3},()=>({done:false}))});save();closeD(picker);renderWorkout();toast(EX[id].name+' added.');});
-      list.appendChild(b);});
-  });
-  openD(picker);
-});
+document.getElementById('addEx').addEventListener('click',()=>{renderLib(document.getElementById('pHost'),'pick');openD(picker);});
 
 /* clock + rest */
 function tickClock(){
