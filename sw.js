@@ -1,7 +1,7 @@
 /* Steady Training offline worker.
    Pages: try the network first so updates arrive, fall back to the saved copy when offline.
    Everything else (icons, fonts): use the saved copy, refresh it in the background. */
-const CACHE = 'steady-v1';
+const CACHE = 'steady-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
