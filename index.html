@@ -8,6 +8,12 @@
 <meta name="theme-color" content="#FFFFFF">
 <meta name="color-scheme" content="light only">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Steady">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
 <style>
@@ -74,6 +80,10 @@ p{margin:0}
 .brand{font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink)}
 .home h1{font-size:30px;font-weight:800}
 .sub{color:var(--muted);font-size:14px}
+.notice{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1.5px solid var(--accent-soft);border-radius:16px;padding:14px 16px}
+.notice b{display:block;font-family:var(--display);font-size:15px}
+.notice span{font-size:13px;color:var(--muted)}
+.notice .btn{flex:none}
 .resume{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--accent);color:var(--on-accent);border:0;border-radius:16px;padding:14px 16px;cursor:pointer;text-align:left;width:100%}
 .resume b{font-family:var(--display);font-size:16px;display:block}
 .resume span{font-size:13px;opacity:.9}
@@ -203,6 +213,14 @@ dialog::backdrop{background:rgba(38,43,58,.35)}
     <div class="brand">Steady &#xb7; your personal plan</div>
     <h1>This week</h1>
     <p class="sub">Tap a day to start. Missed one? Just start the next workout in line.</p>
+  </div>
+  <div class="notice" id="installCard" hidden>
+    <div><b>Install Steady as an app</b><span id="installText">Get a home-screen icon and use it offline at the gym.</span></div>
+    <button class="btn" id="installBtn" type="button" hidden>Install</button>
+  </div>
+  <div class="notice" id="backupCard" hidden>
+    <div><b>Back up your log</b><span id="backupText"></span></div>
+    <button class="btn" id="backupNow" type="button">Back up</button>
   </div>
   <button class="resume" id="resume" type="button" hidden><div><b id="resumeT"></b><span id="resumeS"></span></div><span aria-hidden="true">Resume &rsaquo;</span></button>
   <div class="days" id="days"></div>
@@ -710,6 +728,7 @@ function renderHome(){
       (d.kind!=='rest'?'<span class="chev" aria-hidden="true">&rsaquo;</span>':'<span></span>');
     box.appendChild(b);
   });
+  if(typeof renderBackupCard==='function'){renderBackupCard();renderInstall();}
   const r=document.getElementById('resume');
   if(S.active){r.hidden=false;document.getElementById('resumeT').textContent='Workout in progress \u00b7 '+S.active.day;document.getElementById('resumeS').textContent=S.active.title+' \u00b7 started '+mmss(Date.now()-S.active.start)+' ago';}
   else r.hidden=true;
@@ -939,7 +958,37 @@ document.getElementById('csv').addEventListener('click',()=>{
     (w.cardio||[]).forEach(c=>out.push([k,w.day,w.title,c.act,'','','','','',c.min].map(q).join(',')));});
   download('workouts.csv','text/csv;charset=utf-8','\ufeff'+out.join('\n'));toast('CSV downloaded.');
 });
-document.getElementById('backup').addEventListener('click',()=>{download('workouts-backup.json','application/json',JSON.stringify(S));toast('Backup downloaded.');});
+function doBackup(){
+  S.lastBackup=Date.now();
+  download('steady-backup-'+dayKey(Date.now())+'.json','application/json',JSON.stringify(S));
+  save();renderHome();toast('Backup saved. Keep it in iCloud Drive, Google Drive or email.');
+}
+document.getElementById('backup').addEventListener('click',doBackup);
+document.getElementById('backupNow').addEventListener('click',doBackup);
+
+/* ---------- app install, permanent storage, backup reminder ---------- */
+const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+let installEvt=null;
+function renderInstall(){
+  const card=document.getElementById('installCard'),btn=document.getElementById('installBtn'),txt=document.getElementById('installText');
+  if(standalone()){card.hidden=true;return;}
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(installEvt){card.hidden=false;btn.hidden=false;txt.textContent='Get a home-screen icon and use it offline at the gym.';}
+  else if(ios){card.hidden=false;btn.hidden=true;txt.textContent='In Safari, tap Share, then \u201cAdd to Home Screen\u201d. Opening it from there also keeps your log safe.';}
+  else card.hidden=true;
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;renderInstall();});
+window.addEventListener('appinstalled',()=>{installEvt=null;renderInstall();toast('Steady is installed. Open it from your home screen.');});
+document.getElementById('installBtn').addEventListener('click',()=>{if(!installEvt)return;installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;renderInstall();});});
+function renderBackupCard(){
+  const card=document.getElementById('backupCard');
+  const n=S.history.length,last=S.lastBackup;
+  const due=n>0&&(!last||Date.now()-last>14*864e5);
+  card.hidden=!due;
+  if(due)document.getElementById('backupText').textContent=(last?'Last backup '+shortDate(last)+'. ':'Never backed up. ')+'Your '+pl(n,'workout')+' only live on this phone.';
+}
+if(navigator.storage&&navigator.storage.persist){navigator.storage.persisted().then(p=>{if(!p)navigator.storage.persist();}).catch(()=>{});}
+if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 document.getElementById('restore').addEventListener('change',ev=>{
   const file=ev.target.files[0];if(!file)return;
   file.text().then(t=>{const d=JSON.parse(t);if(!d||!Array.isArray(d.history))throw 0;
@@ -950,7 +999,7 @@ document.getElementById('restore').addEventListener('change',ev=>{
 });
 
 /* ---------- boot ---------- */
-renderHome();
+renderHome();renderBackupCard();renderInstall();
 if(S.active){renderWorkout();show('workout');}else show('home');
 })();
 </script>
